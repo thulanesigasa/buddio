@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UJ LMS: Assessment 1 — Mobile Application Architecture (Moodle Simulation)</title>
+  <style>
+    :root {
+      --moodle-bg: #f2f4f8;
+      --moodle-card: #ffffff;
+      --moodle-text: #1d2125;
+      --moodle-border: #dee2e6;
+      --moodle-blue: #0f6cbf;
+      --moodle-blue-hover: #0b5394;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    body { background-color: var(--moodle-bg); color: var(--moodle-text); line-height: 1.5; padding: 24px; }
+    .header { max-width: 960px; margin: 0 auto 24px auto; padding: 16px 24px; background: #fff; border-radius: 8px; border: 1px solid var(--moodle-border); display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 20px; color: #333; }
+    .header .timer { font-size: 14px; font-weight: 600; color: #d9534f; }
+    .container { max-width: 960px; margin: 0 auto; display: grid; grid-template-columns: 1fr 240px; gap: 24px; }
+    .que { background: var(--moodle-card); border: 1px solid var(--moodle-border); border-radius: 8px; padding: 24px; margin-bottom: 24px; position: relative; }
+    .que .info { border-bottom: 1px solid var(--moodle-border); padding-bottom: 12px; margin-bottom: 16px; font-size: 13px; color: #6c757d; }
+    .que .info .no { font-weight: 700; color: #212529; font-size: 15px; }
+    .que .qtext { font-size: 16px; font-weight: 500; margin-bottom: 16px; color: #212529; }
+    .que .answer { display: flex; flex-direction: column; gap: 10px; }
+    .que .answer .option-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid var(--moodle-border); border-radius: 6px; cursor: pointer; transition: all 0.2s ease; }
+    .que .answer .option-row:hover { background-color: #f8f9fa; }
+    .que .answer input[type="radio"] { width: 18px; height: 18px; cursor: pointer; }
+    .que .answer label { cursor: pointer; flex: 1; font-size: 14px; }
+    .btn-submit { background-color: var(--moodle-blue); color: white; border: none; padding: 12px 24px; font-size: 14px; font-weight: 600; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+    .btn-submit:hover { background-color: var(--moodle-blue-hover); }
+    .nav-box { background: white; border: 1px solid var(--moodle-border); border-radius: 8px; padding: 16px; height: fit-content; }
+    .nav-box h3 { font-size: 14px; margin-bottom: 12px; }
+    .grid-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .grid-btn { padding: 8px; text-align: center; border: 1px solid var(--moodle-border); border-radius: 4px; font-size: 12px; cursor: pointer; }
+    .grid-btn.active { background: #e7f1ff; border-color: var(--moodle-blue); font-weight: bold; }
+    .grid-btn.answered { background: #e8f5e9; border-color: #4caf50; }
+    #submission-banner { display: none; background: #e8f5e9; border: 1px solid #4caf50; color: #2e7d32; padding: 16px; border-radius: 8px; margin-top: 16px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div>
+      <div style="font-size: 12px; text-transform: uppercase; color: #6c757d; font-weight: 600;">UJ Business School &bull; FNB App Academy</div>
+      <h1>Module 1: Mobile Architecture & Design Exam</h1>
+    </div>
+    <div class="timer">Time left: 44:12</div>
+  </header>
+
+  <div class="container">
+    <main>
+      <form id="quiz-form" onsubmit="handleQuizSubmit(event)">
+
+        <!-- Question 1 -->
+        <div class="que multichoice" id="q1">
+          <div class="info">
+            Question <span class="no">1</span> &bull; Not yet answered &bull; Marked out of 1.00
+          </div>
+          <div class="content">
+            <div class="qtext">
+              In mobile UI design, what is the primary role of the 60% Dominant Base in the 60-30-10 design system?
+            </div>
+            <div class="answer">
+              <div class="option-row" onclick="checkRadio('q1_opt_a')">
+                <input type="radio" name="q1_answer" id="q1_opt_a" value="A">
+                <label for="q1_opt_a">A. It provides the interactive call-to-action buttons and vibrant accent highlights.</label>
+              </div>
+              <div class="option-row" onclick="checkRadio('q1_opt_b')">
+                <input type="radio" name="q1_answer" id="q1_opt_b" value="B">
+                <label for="q1_opt_b">B. It establishes the foundational canvas background that anchors the visual atmosphere.</label>
+              </div>
+              <div class="option-row" onclick="checkRadio('q1_opt_c')">
+                <input type="radio" name="q1_answer" id="q1_opt_c" value="C">
+                <label for="q1_opt_c">C. It formats cards, sidebars, modal surfaces, and secondary panels.</label>
+              </div>
+              <div class="option-row" onclick="checkRadio('q1_opt_d')">
+                <input type="radio" name="q1_answer" id="q1_opt_d" value="D">
+                <label for="q1_opt_d">D. It enables rainbow alert states and status tag badges.</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="que multichoice" id="q2">
+          <div class="info">
+            Question <span class="no">2</span> &bull; Not yet answered &bull; Marked out of 1.00
+          </div>
+          <div class="content">
+            <div class="qtext">
+              In cross-platform mobile development using React Native, why is SafeAreaView essential for screen layouts?
+            </div>
+            <div class="answer">
+              <div class="option-row" onclick="checkRadio('q2_opt_a')">
+                <input type="radio" name="q2_answer" id="q2_opt_a" value="A">
+                <label for="q2_opt_a">A. To render webviews instead of native Android and iOS views.</label>
+              </div>
+              <div class="option-row" onclick="checkRadio('q2_opt_b')">
+                <input type="radio" name="q2_answer" id="q2_opt_b" value="B">
+                <label for="q2_opt_b">B. To prevent network latency during REST API calls.</label>
+              </div>
+              <div class="option-row" onclick="checkRadio('q2_opt_c')">
+                <input type="radio" name="q2_answer" id="q2_opt_c" value="C">
+                <label for="q2_opt_c">C. To respect device OS chrome including status bars, notches, home indicators, and cutouts.</label>
+              </div>
+              <div class="option-row" onclick="checkRadio('q2_opt_d')">
+                <input type="radio" name="q2_answer" id="q2_opt_d" value="D">
+                <label for="q2_opt_d">D. To encrypt local storage database files on the device.</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="que truefalse" id="q3">
+          <div class="info">
+            Question <span class="no">3</span> &bull; Not yet answered &bull; Marked out of 1.00
+          </div>
+          <div class="content">
+            <div class="qtext">
+              In RESTful API design, an HTTP PUT request is idempotent because calling it multiple times with the same payload produces the same end state on the server.
+            </div>
+            <div class="answer">
+              <div class="option-row" onclick="checkRadio('q3_opt_true')">
+                <input type="radio" name="q3_answer" id="q3_opt_true" value="True">
+                <label for="q3_opt_true">True</label>
+              </div>
+              <div class="option-row" onclick="checkRadio('q3_opt_false')">
+                <input type="radio" name="q3_answer" id="q3_opt_false" value="False">
+                <label for="q3_opt_false">False</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+          <input type="submit" name="next" id="mod_quiz-next-nav" value="Next page" class="btn-submit">
+        </div>
+
+        <div id="submission-banner">
+          All responses recorded successfully! Attempt saved in Moodle session.
+        </div>
+      </form>
+    </main>
+
+    <aside class="nav-box">
+      <h3>Quiz Navigation</h3>
+      <div class="grid-btns">
+        <div class="grid-btn active" id="nav-q1">1</div>
+        <div class="grid-btn active" id="nav-q2">2</div>
+        <div class="grid-btn active" id="nav-q3">3</div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    function checkRadio(id) {
+      const radio = document.getElementById(id);
+      if (radio) {
+        radio.checked = true;
+        const event = new Event('change', { bubbles: true });
+        radio.dispatchEvent(event);
+      }
+    }
+
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        const qId = radio.name.split('_')[0];
+        const navEl = document.getElementById('nav-' + qId);
+        if (navEl) navEl.classList.add('answered');
+      });
+    });
+
+    function handleQuizSubmit(e) {
+      e.preventDefault();
+      document.getElementById('submission-banner').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
