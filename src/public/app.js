@@ -41,20 +41,31 @@ function appendLog(action, message) {
   logStream.scrollTop = logStream.scrollHeight;
 }
 
+const autopilotStatusMessage = document.getElementById('autopilot-status-message');
+
 // Mode Selection
-modeCopilot.addEventListener('click', () => {
+modeCopilot.addEventListener('click', async () => {
   modeCopilot.classList.add('active');
   modeAutopilot.classList.remove('active');
   isAutopilotActive = false;
   appendLog('MODE', 'Switched to Co-Pilot mode (user review required).');
+  await fetch('/api/autopilot/toggle', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ enabled: false }),
+  });
 });
 
-modeAutopilot.addEventListener('click', () => {
+modeAutopilot.addEventListener('click', async () => {
   modeAutopilot.classList.add('active');
   modeCopilot.classList.remove('active');
   isAutopilotActive = true;
-  appendLog('MODE', 'Switched to Autopilot mode (continuous automated solving).');
-  runAutopilotLoop();
+  appendLog('MODE', 'Autopilot activated. Monitoring browser state for UJ LMS login & assessments...');
+  await fetch('/api/autopilot/toggle', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ enabled: true }),
+  });
 });
 
 // Quick URL Switches
@@ -335,3 +346,40 @@ btnRefreshDocs.addEventListener('click', loadCourseDocs);
 
 // Initial bootstrap
 loadCourseDocs();
+
+// Autopilot Status Polling & UI Sync
+let lastAutopilotMsg = '';
+setInterval(async () => {
+  try {
+    const res = await fetch('/api/autopilot/status');
+    const data = await res.json();
+
+    if (data.success) {
+      if (autopilotStatusMessage) {
+        autopilotStatusMessage.textContent = data.message;
+      }
+
+      // Sync button states
+      if (data.enabled && !modeAutopilot.classList.contains('active')) {
+        modeAutopilot.classList.add('active');
+        modeCopilot.classList.remove('active');
+        isAutopilotActive = true;
+      } else if (!data.enabled && modeAutopilot.classList.contains('active')) {
+        modeAutopilot.classList.remove('active');
+        modeCopilot.classList.add('active');
+        isAutopilotActive = false;
+      }
+
+      // Log updates on message change
+      if (data.enabled && data.message !== lastAutopilotMsg) {
+        lastAutopilotMsg = data.message;
+        appendLog('NAVIGATOR', data.message);
+
+        // If currently solving or page navigated, refresh the question display
+        if (data.state === 'SOLVING_PAGE' || data.state === 'COMPLETED') {
+          scanDom();
+        }
+      }
+    }
+  } catch {}
+}, 1500);

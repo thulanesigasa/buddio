@@ -44,9 +44,12 @@ export class DocumentIngestor {
       // Handle PDFs
       if (lower.endsWith('.pdf') && pdfParse) {
         try {
-          const buffer = fs.readFileSync(fullPath);
-          const parsed = await pdfParse(buffer);
-          const pdfChunks = this.splitContentIntoChunks(file, parsed.text || '');
+          const PDFParseClass = typeof pdfParse === 'function' ? pdfParse : (pdfParse.PDFParse || pdfParse);
+          const parser = new PDFParseClass({ url: fullPath });
+          await parser.load();
+          const parsed = await parser.getText();
+          const rawText = typeof parsed === 'string' ? parsed : (parsed?.text || '');
+          const pdfChunks = this.splitContentIntoChunks(file, rawText);
           chunks.push(...pdfChunks);
           continue;
         } catch (err: any) {

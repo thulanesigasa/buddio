@@ -139,10 +139,13 @@ npm run test:quiz
 
 ---
 
-## Operational Workflow
+## Operational Workflow (Hands-Free Autonomous Execution)
 
-1. **Ingest Notes**: Place course notes, slides, or transcripts in the `materials/` directory.
-2. **Start Control Center**: Run `npm run dev` and navigate to `http://localhost:3000`.
-3. **Launch Browser**: Click **Launch Browser** to spawn the headed Chromium instance.
-4. **Log In to LMS**: In the browser window, sign into the UJ LMS portal (`lms.uj.ac.za`) and navigate to the assessment.
-5. **Execute**: Toggle **Co-Pilot** (step-by-step review) or **Autopilot** (automated navigation).
+1. **Ingest Modules**: Drop Module 1 to 5 PDFs or notes into the `materials/` directory (`d:\workspace_programming\websites\buddio\materials\`).
+2. **Access Control Center**: Open `http://localhost:3000` in your web browser.
+3. **Launch & Activate**: Click **Launch Browser** and toggle **Autopilot** mode.
+4. **Log In Securely**: In the headed Chromium window that opens, enter your UJ student credentials and complete any 2FA/SSO naturally.
+5. **Hands-Free Navigation**: 
+   - Buddio continuously monitors the browser state.
+   - Once logged in, open your module assessment or quiz attempt.
+   - Buddio automatically detects the quiz questions in the DOM, cross-references course materials from `materials/`, selects the correct answers with human-like pacing, advances to the next page, and navigates through the entire assessment autonomously.

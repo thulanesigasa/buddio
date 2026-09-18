@@ -181,7 +181,52 @@ body {
   color: #FFFFFF;
 }
 
-/* Main Layout Grid */
+/* Autopilot Banner */
+.autopilot-banner-container {
+  padding: 14px 28px 0 28px;
+}
+
+.autopilot-banner {
+  background-color: var(--surface-panel);
+  border: 1px solid var(--border-hairline);
+  border-left: 4px solid var(--accent-fnb);
+  border-radius: 6px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.autopilot-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.autopilot-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--accent-fnb);
+}
+
+.autopilot-info {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.autopilot-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-fnb);
+  letter-spacing: -0.01em;
+}
+
+.autopilot-status-msg {
+  font-size: 13px;
+  color: var(--text-primary);
+}
 .dashboard-grid {
   display: grid;
   grid-template-columns: 340px 1fr;
