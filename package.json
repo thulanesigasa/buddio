@@ -1,0 +1,38 @@
+{
+  "name": "buddio",
+  "version": "1.0.0",
+  "description": "Buddio — Intelligent browser automation and assessment assistant for UJ LMS / FNB App Academy with Playwright, RAG course material ingestion, and local control center.",
+  "type": "module",
+  "main": "dist/server/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server/server.js",
+    "dev": "tsx watch src/server/server.ts",
+    "test:quiz": "tsx src/tests/testMockQuiz.ts"
+  },
+  "keywords": [
+    "buddio",
+    "playwright",
+    "automation",
+    "lms",
+    "moodle",
+    "uj",
+    "fnb-app-academy",
+    "rag"
+  ],
+  "author": "Thulane Sigasa",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "playwright": "^1.50.1",
+    "dotenv": "^16.4.7",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.4",
+    "@types/ws": "^8.5.14",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}
