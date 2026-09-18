@@ -47,6 +47,86 @@ async function refreshKnowledgeBase() {
 }
 refreshKnowledgeBase();
 
+// Autopilot State Machine
+let isAutopilotEnabled = false;
+let autopilotState = 'IDLE'; // 'IDLE' | 'WAITING_FOR_LOGIN' | 'WAITING_FOR_QUIZ' | 'SOLVING_PAGE' | 'COMPLETED'
+let autopilotStatusMessage = 'System ready. Launch browser to start.';
+let autopilotSolvingLock = false;
+
+async function checkAutopilotCycle() {
+  if (!isAutopilotEnabled || autopilotSolvingLock) return;
+
+  const page = browserManager.getPage();
+  if (!page || page.isClosed()) {
+    isAutopilotEnabled = false;
+    autopilotState = 'IDLE';
+    autopilotStatusMessage = 'Browser is closed. Click "Launch Browser" to begin.';
+    return;
+  }
+
+  try {
+    const scan = await domScanner.scanPage(page);
+
+    // 1. Detect UJ LMS Login Page
+    if (scan.isLoginPage) {
+      autopilotState = 'WAITING_FOR_LOGIN';
+      autopilotStatusMessage = 'UJ LMS Login screen detected. Please enter your student login details in the browser...';
+      return;
+    }
+
+    // 2. Detect Assessment Attempt Summary / Submission Page
+    if (scan.isSummaryPage) {
+      autopilotState = 'COMPLETED';
+      autopilotStatusMessage = 'Summary of attempt reached! All questions answered.';
+      return;
+    }
+
+    // 3. Detect Assessment Quiz Page with Questions
+    if (scan.isQuizPage && scan.questions.length > 0) {
+      autopilotSolvingLock = true;
+      autopilotState = 'SOLVING_PAGE';
+      autopilotStatusMessage = `Assessment detected (${scan.questions.length} questions)! Automatically analyzing and answering...`;
+
+      for (let i = 0; i < scan.questions.length; i++) {
+        if (!isAutopilotEnabled) break;
+        const q = scan.questions[i];
+        const optionTexts = q.options.map((o) => o.text);
+        const relevantChunks = retriever.search(q.prompt, optionTexts, 3);
+        const solution = await solver.solveQuestion(q, relevantChunks);
+
+        autopilotStatusMessage = `Auto-filling Question ${q.questionNumber}: selecting Option ${solution.selectedOptionLabel} (${solution.confidence}% confidence)...`;
+        await actionExecutor.selectOption(page, solution.selectedSelector, solution.selectedOptionLabel);
+        await new Promise((r) => setTimeout(r, 1200)); // Natural pacing
+      }
+
+      // Check if next button exists
+      if (isAutopilotEnabled && scan.nextButtonSelector) {
+        autopilotStatusMessage = 'Page completed. Advancing to next assessment page in 2s...';
+        await new Promise((r) => setTimeout(r, 2000));
+        await actionExecutor.advanceNextPage(page, scan.nextButtonSelector);
+        autopilotStatusMessage = 'Navigated to next page. Scanning new questions...';
+        await new Promise((r) => setTimeout(r, 2000));
+      } else if (!scan.nextButtonSelector) {
+        autopilotState = 'COMPLETED';
+        autopilotStatusMessage = 'Assessment questions completed!';
+      }
+
+      autopilotSolvingLock = false;
+      return;
+    }
+
+    // 4. Authenticated, waiting for student to navigate into course assessment
+    autopilotState = 'WAITING_FOR_QUIZ';
+    autopilotStatusMessage = 'Authenticated! Navigate to your module assessment in the browser. Buddio will take over automatically once the quiz loads.';
+  } catch (err: any) {
+    autopilotSolvingLock = false;
+    console.warn('[Autopilot Watcher]', err.message);
+  }
+}
+
+// Background watcher interval every 2 seconds
+setInterval(checkAutopilotCycle, 2000);
+
 // Mock Quiz Route
 app.get('/mock-quiz', (req: Request, res: Response) => {
   res.sendFile(path.join(publicDir, 'mockQuiz.html'));
@@ -168,6 +248,37 @@ app.get('/api/materials', async (req: Request, res: Response) => {
   }));
 
   res.json({ success: true, totalChunks: chunks.length, documents });
+});
+
+// Autopilot Control Endpoints
+app.get('/api/autopilot/status', (req: Request, res: Response) => {
+  res.json({
+    success: true,
+    enabled: isAutopilotEnabled,
+    state: autopilotState,
+    message: autopilotStatusMessage,
+  });
+});
+
+app.post('/api/autopilot/toggle', async (req: Request, res: Response) => {
+  const { enabled } = req.body;
+  isAutopilotEnabled = typeof enabled === 'boolean' ? enabled : !isAutopilotEnabled;
+
+  if (isAutopilotEnabled) {
+    autopilotStatusMessage = 'Autopilot activated. Monitoring browser state...';
+    // Run an immediate check
+    checkAutopilotCycle().catch(() => {});
+  } else {
+    autopilotState = 'IDLE';
+    autopilotStatusMessage = 'Autopilot paused.';
+  }
+
+  res.json({
+    success: true,
+    enabled: isAutopilotEnabled,
+    state: autopilotState,
+    message: autopilotStatusMessage,
+  });
 });
 
 app.listen(PORT, () => {
