@@ -4,6 +4,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
 [![Playwright](https://img.shields.io/badge/Playwright-1.50-2EAD33?style=flat-square&logo=playwright)](https://playwright.dev)
 [![UJ LMS](https://img.shields.io/badge/LMS-Moodle%20UJ-F37021?style=flat-square)](https://lms.uj.ac.za)
+[![Express](https://img.shields.io/badge/Server-Express%204.21-000000?style=flat-square&logo=express)](https://expressjs.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-00A389?style=flat-square)](LICENSE)
 
 Buddio is an automated browser co-pilot and assessment solver designed for participants of the FNB App Academy and University of Johannesburg (UJ) Business School Skills Development Program on the Moodle LMS (`lms.uj.ac.za`).
@@ -12,7 +13,7 @@ Buddio integrates Playwright headed browser automation, live DOM question extrac
 
 ---
 
-## Key Features
+## Core Capabilities
 
 - **Headed Browser Automation**: Launches Chromium with persistent session state (`.browser_session`), allowing secure single login (SSO/Moodle authentication) while Buddio manages test navigation.
 - **Dynamic Moodle DOM Parser**: Parses Moodle quiz containers (`.que.multichoice`, `.que.truefalse`, `.que.shortanswer`), capturing question prompts, code blocks, images, and labeled radio/checkbox options with precise selectors.
@@ -21,7 +22,7 @@ Buddio integrates Playwright headed browser automation, live DOM question extrac
   - **Co-Pilot Mode**: Inspects the question, retrieves knowledge, highlights recommended choices in the browser, displays reasoning on the dashboard, and waits for one-click user authorization.
   - **Autopilot Mode**: Sequentially answers questions and advances pages with configurable human-like interaction timing.
 - **Built-in Mock LMS Testbed**: Includes a local mock Moodle quiz server (`/mock-quiz`) replicating authentic Moodle DOM markup for safe, risk-free validation before live testing.
-- **60-30-10 Control Center**: Minimalist, dark-mode real-time web dashboard adhering strictly to the 60-30-10 color palette with zero emojis and 100% SVG vectors.
+- **60-30-10 Control Center**: Minimalist, dark-mode real-time web dashboard adhering strictly to the 60-30-10 color palette (`#0B0F19` / `#131B2E` / `#00A389`) with zero emojis and 100% SVG vectors from svgrepo.
 
 ---
 
@@ -56,37 +57,38 @@ Buddio integrates Playwright headed browser automation, live DOM question extrac
 
 ---
 
-## Directory Structure
+## Directory & Component Breakdown
 
 ```
 buddio/
+|-- .env.example                # Sample environment configuration
 |-- .gitignore                  # Git ignore rules for node_modules and session data
 |-- package.json                # Project dependencies and operational scripts
 |-- tsconfig.json               # TypeScript compiler configuration
 |-- README.md                   # System documentation and operational guides
 |-- materials/                  # Course documents, lecture notes, syllabus files
 |   |-- .gitkeep
-|   `-- sample_fnb_course_notes.md
+|   `-- sample_fnb_course_notes.md  # Comprehensive FNB App Academy reference notes
 `-- src/
     |-- ai/                     # AI decision engine and prompt synthesizers
-    |   `-- solver.ts
+    |   `-- solver.ts           # Grounded multi-choice solver (Gemini, OpenAI, Heuristics)
     |-- automation/             # Playwright automation, DOM parsers, and clickers
-    |   |-- actionExecutor.ts
-    |   |-- browserManager.ts
-    |   `-- domScanner.ts
+    |   |-- actionExecutor.ts   # Form input filler, radio selector, visual highlighter
+    |   |-- browserManager.ts   # Headed Chromium lifecycle with persistent profile
+    |   `-- domScanner.ts       # Dynamic extractor for Moodle .que question DOM structures
     |-- knowledge/              # Text chunking, indexing, and retrieval pipeline
-    |   |-- docIngestor.ts
-    |   `-- retriever.ts
+    |   |-- docIngestor.ts      # Markdown and text document parser with chunking
+    |   `-- retriever.ts        # Fast lexical and semantic token overlap search engine
     |-- public/                 # Control dashboard UI and mock quiz assets
-    |   |-- app.js
-    |   |-- index.css
-    |   |-- index.html
-    |   `-- mockQuiz.html
+    |   |-- app.js              # Dashboard event controller and autopilot loop
+    |   |-- index.css           # 60-30-10 dark mode design system (Vanilla CSS)
+    |   |-- index.html          # Control center interface with SVGs (no emojis)
+    |   `-- mockQuiz.html       # High-fidelity Moodle LMS quiz test fixture
     |-- server/                 # HTTP and WebSocket backend API
-    |   `-- server.ts
+    |   `-- server.ts           # Express server coordinating automation and RAG
     `-- tests/                  # Automated validation scripts and test fixtures
         |-- .gitkeep
-        `-- testMockQuiz.ts
+        `-- testMockQuiz.ts     # End-to-end integration test against local mock quiz
 ```
 
 ---
@@ -123,12 +125,24 @@ buddio/
 
 ---
 
-## Operational Guide
+## Verification & Testing
 
-1. Place course notes, slides, or transcripts in the `materials/` directory.
-2. Launch Buddio via `npm run dev`.
-3. Open `http://localhost:3000` in your browser.
-4. Click **Launch Browser** to open the headed Chromium instance.
-5. In the headed window, sign into the UJ LMS portal (`lms.uj.ac.za`) and navigate to the assessment.
-6. Toggle **Co-Pilot** or **Autopilot** mode in the Buddio dashboard.
-7. Observe live question extraction, reference retrieval, and automated option selection.
+Buddio includes an automated end-to-end integration test that boots against the internal mock Moodle quiz (`/mock-quiz`), inspects the DOM, cross-references course materials, and verifies that questions are answered correctly:
+
+```bash
+# In terminal 1: Start the Buddio server
+npm run dev
+
+# In terminal 2: Execute automated quiz test
+npm run test:quiz
+```
+
+---
+
+## Operational Workflow
+
+1. **Ingest Notes**: Place course notes, slides, or transcripts in the `materials/` directory.
+2. **Start Control Center**: Run `npm run dev` and navigate to `http://localhost:3000`.
+3. **Launch Browser**: Click **Launch Browser** to spawn the headed Chromium instance.
+4. **Log In to LMS**: In the browser window, sign into the UJ LMS portal (`lms.uj.ac.za`) and navigate to the assessment.
+5. **Execute**: Toggle **Co-Pilot** (step-by-step review) or **Autopilot** (automated navigation).
