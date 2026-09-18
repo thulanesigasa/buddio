@@ -39,8 +39,8 @@ const retriever = new KnowledgeRetriever();
 const solver = new QuestionSolver();
 
 // Ingest documents on startup
-function refreshKnowledgeBase() {
-  const chunks = docIngestor.ingestAll();
+async function refreshKnowledgeBase() {
+  const chunks = await docIngestor.ingestAllAsync();
   retriever.setChunks(chunks);
   console.log(`[Buddio Knowledge] Ingested ${chunks.length} chunks from course materials.`);
   return chunks;
@@ -154,8 +154,8 @@ app.post('/api/next-page', async (req: Request, res: Response) => {
 });
 
 // Ingestion & Materials Info
-app.get('/api/materials', (req: Request, res: Response) => {
-  const chunks = docIngestor.ingestAll();
+app.get('/api/materials', async (req: Request, res: Response) => {
+  const chunks = await docIngestor.ingestAllAsync();
   const summaryMap = new Map<string, number>();
 
   for (const c of chunks) {
